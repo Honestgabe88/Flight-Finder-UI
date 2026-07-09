@@ -526,6 +526,12 @@ const path = require('node:path');
 const VERDICT_FILE = path.join(__dirname, '..', 'docs', 'superpowers', 'spikes',
   '2026-07-09-headless-agent-mcp.md');
 
+// Least-privilege allowlist: the headless agent may call ONLY these two read-only
+// flight-search MCP tools. Everything else stays behind the permission gate a
+// `--print` subprocess cannot satisfy, so a prompt-injection via the search fields
+// cannot escalate to Bash/file access.
+const ALLOWED_MCP_TOOLS = 'mcp__claude_ai_Kiwi_com__search-flight,mcp__claude_ai_lastminute_com__search_flights';
+
 // Extract the first top-level JSON array from arbitrary agent text output.
 function extractOptions(stdout) {
   if (!stdout) return [];
@@ -576,8 +582,8 @@ function runAgentSearch(query, { timeoutMs = 5 * 60 * 1000 } = {}) {
   const prompt = buildPrompt(query);
   return new Promise((resolve) => {
     const child = spawn('claude', ['--print', '--output-format', 'text', '--model', 'claude-sonnet-5',
-      '--permission-mode', 'bypassPermissions', prompt],
-      { cwd: path.join(__dirname, '..') });
+      `--allowedTools=${ALLOWED_MCP_TOOLS}`, prompt],
+      { cwd: path.join(__dirname, '..'), stdio: ['ignore', 'pipe', 'pipe'] });
     let out = '', err = '';
     const timer = setTimeout(() => child.kill('SIGKILL'), timeoutMs);
     child.stdout.on('data', (d) => (out += d));

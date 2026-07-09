@@ -100,17 +100,36 @@ stalls on an unanswerable approval prompt; Probe 2 proved the bypass flag
 resolves it). The account MCP servers are available headlessly; only the
 interactive approval gate was in the way.
 
-**Security note:** `bypassPermissions` disables all permission prompts for
-that subprocess. It is acceptable here because the subprocess runs a fixed,
-read-only flight-search prompt against known flight-search MCP tools, fully
-under our control. A tighter future hardening is `--allowedTools` scoped to
-just the two flight tools; `bypassPermissions` is the confirmed-working
-choice for now.
+## Probe 3 — least-privilege scoped allowlist (the approach we ship)
+
+`bypassPermissions` (Probe 2) works but disables ALL permission prompts for
+the subprocess — an unnecessarily broad grant, since the search prompt embeds
+user-typed origin/destination and could carry a prompt-injection payload.
+Re-ran with a scoped allowlist instead of the blanket bypass:
+
+```bash
+claude --print --output-format text --model claude-sonnet-5 \
+  --allowedTools=mcp__claude_ai_Kiwi_com__search-flight,mcp__claude_ai_lastminute_com__search_flights \
+  "$PROMPT" < /dev/null
+```
+
+Result (exit 0): a JSON array with real Kiwi itineraries (`$147`, `kiwi.com/u/…`)
+AND real lastminute itineraries (`$262.81`+, full `lastminute.ie/msr/…` deep-links).
+Both sources work headlessly under the scoped allowlist. Note: `--allowedTools`
+is variadic, so it must be passed in `=` form (`--allowedTools=a,b`) or it will
+swallow the positional prompt argument.
+
+**Security decision:** ship the **scoped allowlist**, NOT `bypassPermissions`.
+The headless agent may call only the two read-only flight-search tools; any
+attempt to run Bash/Edit/Write or reach another MCP server hits the permission
+gate, which a `--print` subprocess cannot satisfy — so it is safely blocked.
+This is least-privilege and neutralizes prompt-injection escalation via the
+search fields.
 
 ## Resulting decision
 
-Task 4 implements **path A**: `server.js` spawns `claude --print
---permission-mode bypassPermissions` per search to run the Kiwi +
-lastminute MCP search headlessly. No human-in-the-loop is required. The
-Google Flights scraper still runs headlessly and deterministically
-alongside it.
+Task 4 implements **path A**: `server.js` spawns
+`claude --print --allowedTools=mcp__claude_ai_Kiwi_com__search-flight,mcp__claude_ai_lastminute_com__search_flights`
+per search to run the Kiwi + lastminute MCP search headlessly, under a
+least-privilege allowlist. No human-in-the-loop is required. The Google
+Flights scraper still runs headlessly and deterministically alongside it.
