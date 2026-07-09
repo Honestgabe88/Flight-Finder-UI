@@ -30,7 +30,16 @@
     const id = new URLSearchParams(location.search).get('id');
     const cardsEl = document.getElementById('cards');
     const notesEl = document.getElementById('notes');
-    const fmtTime = (t) => t || '';
+    // Humanize ISO timestamps (2026-08-13T06:24:00 → "6:24 AM"); pass through
+    // already-friendly strings (Google gives "10:00 AM").
+    const fmtTime = (t) => {
+      if (!t) return '';
+      const m = /T(\d{2}):(\d{2})/.exec(t);
+      if (!m) return t;
+      let h = +m[1]; const ap = h < 12 ? 'AM' : 'PM';
+      h = h % 12 || 12;
+      return `${h}:${m[2]} ${ap}`;
+    };
     const fmtDur = (m) => m == null ? '' : `${Math.floor(m/60)}h ${m%60}m`;
     const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
