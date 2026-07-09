@@ -1,0 +1,13 @@
+{
+  "status": "done",
+  "query": { "origin": "Miami", "dest": "Bogota", "departDate": "2026-08-13", "returnDate": null },
+  "generatedAt": "2026-07-09T00:00:00.000Z",
+  "options": [
+    { "source": "kiwi", "priceUsd": 147, "approxPrice": false, "airline": "Copa Airlines", "route": ["MIA","PTY","BOG"], "stops": 1, "durationMin": 342, "depTime": "2026-08-13T06:24:00", "arrTime": "2026-08-13T11:06:00", "bookingUrl": "https://kiwi.com/u/jcgctqw" },
+    { "source": "lastminute", "priceUsd": 158, "approxPrice": false, "airline": "Avianca", "route": ["MIA","BOG"], "stops": 0, "durationMin": 205, "depTime": "2026-08-13T08:00:00", "arrTime": "2026-08-13T11:25:00", "bookingUrl": "https://www.lastminute.com/flights/deal/example" },
+    { "source": "google", "priceUsd": 162, "approxPrice": true, "airline": "LATAM", "route": ["MIA","BOG"], "stops": 0, "durationMin": 210, "depTime": "10:00 AM", "arrTime": "1:30 PM", "bookingUrl": "https://www.google.com/travel/flights?q=Flights%20to%20Bogota%20from%20Miami%20on%202026-08-13%20one%20way&curr=USD&hl=en" },
+    { "source": "kiwi", "priceUsd": 171, "approxPrice": false, "airline": "Copa Airlines", "route": ["MIA","PTY","BOG"], "stops": 1, "durationMin": 401, "depTime": "2026-08-13T17:14:00", "arrTime": "2026-08-13T22:55:00", "bookingUrl": "https://kiwi.com/u/pzb58h" },
+    { "source": "lastminute", "priceUsd": 189, "approxPrice": false, "airline": "American Airlines", "route": ["MIA","BOG"], "stops": 0, "durationMin": 200, "depTime": "2026-08-13T19:30:00", "arrTime": "2026-08-13T22:50:00", "bookingUrl": "https://www.lastminute.com/flights/deal/example2" }
+  ],
+  "notes": []
+}
