@@ -1,0 +1,89 @@
+{
+  "planPath": "docs/superpowers/plans/2026-07-09-cheap-flights-ui.md",
+  "tasks": [
+    {
+      "id": 7,
+      "subject": "Task 0: Project scaffold & dependencies",
+      "status": "completed",
+      "description": "**Goal:** Runnable Node project: deps, folders, shared config. Files: package.json, .gitignore, config.js, folder skeleton. Verify: `npm ls --depth=0 && node --test`.\n\n```json:metadata\n{\"files\": [\"package.json\", \".gitignore\", \"config.js\"], \"verifyCommand\": \"npm ls --depth=0 && node --test\", \"acceptanceCriteria\": [\"deps installed\", \"config.js requires cleanly\", \"node --test exits 0\"], \"modelTier\": \"mechanical\"}\n```"
+    },
+    {
+      "id": 8,
+      "subject": "Task 1: Step 0 — Headless-agent MCP-auth spike (USER-ORDERED GATE)",
+      "status": "completed",
+      "blockedBy": [7],
+      "description": "**USER-ORDERED GATE — NON-SKIPPABLE.** Prove whether a headless `claude -p` run reaches the Kiwi/lastminute MCP tools and returns a booking URL; record GREEN/RED verdict that decides Task 4's path. No page-styling task starts until the verdict is recorded. Files: scripts/spike-agent.sh, docs/superpowers/spikes/2026-07-09-headless-agent-mcp.md.\n\n```json:metadata\n{\"files\": [\"scripts/spike-agent.sh\", \"docs/superpowers/spikes/2026-07-09-headless-agent-mcp.md\"], \"verifyCommand\": \"bash scripts/spike-agent.sh; grep -E 'VERDICT: (GREEN|RED)' docs/superpowers/spikes/2026-07-09-headless-agent-mcp.md\", \"acceptanceCriteria\": [\"headless claude -p run executed and stdout captured\", \"verdict GREEN or RED recorded with pasted evidence\", \"resulting Task 4 path (A or B) stated\"], \"userGate\": true, \"tags\": [\"user-gate\"], \"gateScope\": \"one-before-the-rest\", \"modelTier\": \"standard\"}\n```"
+    },
+    {
+      "id": 9,
+      "subject": "Task 2: Vendor & adapt the Google Flights scraper",
+      "status": "completed",
+      "blockedBy": [7],
+      "description": "**Goal:** Copy backend scraper into lib/, repoint output to our .captures via config; never write to the read-only backend. Files: lib/gflights.js, lib/search.js, test/gflights.test.js. Verify: `node --test test/gflights.test.js`.\n\n```json:metadata\n{\"files\": [\"lib/gflights.js\", \"lib/search.js\", \"test/gflights.test.js\"], \"verifyCommand\": \"node --test test/gflights.test.js\", \"acceptanceCriteria\": [\"gflights.js verbatim copy\", \"search.js writes to our .captures via config\", \"parseAria test passes\"], \"modelTier\": \"standard\"}\n```"
+    },
+    {
+      "id": 10,
+      "subject": "Task 3: Pure normalize + merge + rank module",
+      "status": "completed",
+      "blockedBy": [7],
+      "description": "**Goal:** Pure module: normalize Google rows + agent options to shared schema, ceiling filter, dedupe, rank by USD, source diversity, top 5. Files: lib/merge.js, test/merge.test.js. Verify: `node --test test/merge.test.js`.\n\n```json:metadata\n{\"files\": [\"lib/merge.js\", \"test/merge.test.js\"], \"verifyCommand\": \"node --test test/merge.test.js\", \"acceptanceCriteria\": [\"normalizeGoogleRow converts+marks+builds url\", \"mergeOptions filters/ranks/caps at 5\", \"source diversity guaranteed\", \"tests pass\"], \"modelTier\": \"standard\"}\n```"
+    },
+    {
+      "id": 11,
+      "subject": "Task 4: Agent search runner (Kiwi + lastminute via claude -p)",
+      "status": "completed",
+      "blockedBy": [7],
+      "description": "**Goal:** runAgentSearch(query): path A spawns headless claude -p; path B (spike RED) short-circuits to a marked status. Pure extractOptions parser unit-tested. Files: lib/agentSearch.js, test/agentSearch.test.js. Verify: `node --test test/agentSearch.test.js`.\n\n```json:metadata\n{\"files\": [\"lib/agentSearch.js\", \"test/agentSearch.test.js\"], \"verifyCommand\": \"node --test test/agentSearch.test.js\", \"acceptanceCriteria\": [\"extractOptions robust parse\", \"runAgentSearch path A spawns claude -p\", \"RED verdict short-circuits\", \"tests pass\"], \"modelTier\": \"standard\"}\n```"
+    },
+    {
+      "id": 12,
+      "subject": "Task 5: Static server foundation, theme, marquee & screenshot harness",
+      "status": "completed",
+      "blockedBy": [7],
+      "description": "**Goal:** Static server serving public/, pink CJK-capable theme, reusable trilingual marquee, sample-results fixture, headless Playwright screenshot script. Files: server.js, public/styles.css, public/marquee.js, .captures/sample-results.json, scripts/shot.mjs. Verify: `node scripts/shot.mjs about:blank /tmp/blank.png && ls -l /tmp/blank.png`.\n\n```json:metadata\n{\"files\": [\"server.js\", \"public/styles.css\", \"public/marquee.js\", \".captures/sample-results.json\", \"scripts/shot.mjs\"], \"verifyCommand\": \"node scripts/shot.mjs about:blank /tmp/blank.png && ls -l /tmp/blank.png\", \"acceptanceCriteria\": [\"static server serves public + 404s\", \"shot.mjs writes a PNG\", \"buildMarquee renders 3 phrases scrolling\", \"sample fixture valid\"], \"modelTier\": \"standard\"}\n```"
+    },
+    {
+      "id": 13,
+      "subject": "Task 6: Landing page",
+      "status": "completed",
+      "blockedBy": [8, 12],
+      "description": "**Goal:** Landing — pink rotating globe + trilingual marquee + CTA to /search.html; impeccable polish. Files: public/index.html. Verify: `node scripts/shot.mjs http://localhost:5173/ /tmp/landing.png` + DOM assert {globe:1,phrases:6,btn:'/search.html'}.\n\n```json:metadata\n{\"files\": [\"public/index.html\"], \"verifyCommand\": \"node scripts/shot.mjs http://localhost:5173/ /tmp/landing.png\", \"acceptanceCriteria\": [\"globe + marquee + CTA to /search.html render\", \"screenshot shows globe + marquee\", \"impeccable polish applied\"], \"modelTier\": \"standard\"}\n```"
+    },
+    {
+      "id": 14,
+      "subject": "Task 7: Search form page",
+      "status": "completed",
+      "blockedBy": [8, 12],
+      "description": "**Goal:** Form — origin/dest/depart/optional-return + validation, POST /search, redirect to loading with id. Files: public/search.html, public/app.js. Verify: DOM assert empty-submit shows validation message.\n\n```json:metadata\n{\"files\": [\"public/search.html\", \"public/app.js\"], \"verifyCommand\": \"node --test\", \"acceptanceCriteria\": [\"four fields present\", \"validation blocks empty submit\", \"valid submit posts + redirects with id\"], \"modelTier\": \"standard\"}\n```"
+    },
+    {
+      "id": 15,
+      "subject": "Task 8: Search orchestration routes on the server",
+      "status": "completed",
+      "blockedBy": [9, 10, 11, 12],
+      "description": "**Goal:** POST /search (async job: Google scraper + agent parallel, merge, write results.json) + GET /status?id=. Guard listen with require.main. Files: server.js, test/server.test.js. Verify: `node --test test/server.test.js`.\n\n```json:metadata\n{\"files\": [\"server.js\", \"test/server.test.js\"], \"verifyCommand\": \"node --test test/server.test.js\", \"acceptanceCriteria\": [\"POST /search returns id (202)\", \"job merges sources + writes results.json\", \"GET /status transitions pending->done/error\", \"400 on missing field\"], \"modelTier\": \"standard\"}\n```"
+    },
+    {
+      "id": 16,
+      "subject": "Task 9: Loading page",
+      "status": "completed",
+      "blockedBy": [8, 12, 15],
+      "description": "**Goal:** Loading — marquee central animation + honest status; poll GET /status?id=, redirect to results on done, error state on error. Files: public/loading.html. Verify: DOM assert with mocked done redirects to results.\n\n```json:metadata\n{\"files\": [\"public/loading.html\"], \"verifyCommand\": \"node --test\", \"acceptanceCriteria\": [\"polls /status by id\", \"marquee + honest status while pending\", \"redirect on done, error state on error\"], \"modelTier\": \"standard\"}\n```"
+    },
+    {
+      "id": 17,
+      "subject": "Task 10: Results page",
+      "status": "completed",
+      "blockedBy": [8, 12, 15],
+      "description": "**Goal:** Results — up to 5 cards (price/airline/route+stops/duration/times/source tag/Book link), ~ approx markers, empty/error state. Files: public/results.html, public/sample-results.json. Verify: DOM assert vs fixture {cards:5,books:5,approx:1}.\n\n```json:metadata\n{\"files\": [\"public/results.html\", \"public/sample-results.json\"], \"verifyCommand\": \"node --test\", \"acceptanceCriteria\": [\"renders up to 5 cards with all fields + source tag + Book link\", \"approx prices marked with ~\", \"empty/error state graceful\"], \"modelTier\": \"standard\"}\n```"
+    },
+    {
+      "id": 18,
+      "subject": "Task 11: End-to-end integration & honest-states pass",
+      "status": "completed",
+      "blockedBy": [13, 14, 15, 16, 17],
+      "description": "**Goal:** Real e2e run landing→form→loading→results with ≥1 real booking link; honest states per spike path; full suite passes; final impeccable consistency pass. Files: e2e-notes doc + small integration fixes. Verify: `node --test` + captured results screenshot.\n\n```json:metadata\n{\"files\": [\"docs/superpowers/e2e-notes-2026-07-09.md\"], \"verifyCommand\": \"node --test\", \"acceptanceCriteria\": [\"real e2e run produces populated results with working booking link\", \"honest states correct per spike path\", \"full test suite passes\"], \"modelTier\": \"standard\"}\n```"
+    }
+  ],
+  "lastUpdated": "2026-07-09T00:00:00.000Z"
+}

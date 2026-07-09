@@ -1,0 +1,11 @@
+// See https://containers.dev/implementors/json_reference/ for configuration reference
+{
+	"name": "Untitled Node.js project",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	"mounts": [
+		"source=C:/Users/Owner/projects/cheap_flights,target=/workspaces/other_project,type=bind,readonly"
+	],
+  "remoteUser": "node"
+}

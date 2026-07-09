@@ -4,3 +4,4 @@ node_modules/
 .captures/*.txt
 *.log
 .DS_Store
+.claude/

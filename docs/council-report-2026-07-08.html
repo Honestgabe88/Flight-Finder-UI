@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Council Verdict — UI strategy for cheap_flights</title>
+<style>
+  :root{
+    --bg:#faf9f7; --card:#fff; --ink:#1c1b1a; --muted:#6b6763; --line:#e7e3dd;
+    --accent:#b4551f; --agree:#2f7d5d; --clash:#b8862b; --blind:#8a4fb0;
+    --contra:#c0453f; --first:#2f6db5; --expand:#2f7d5d; --outsider:#b8862b; --exec:#7a5bb0;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:820px;margin:0 auto;padding:48px 24px 80px}
+  header .kicker{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  h1{font-size:30px;line-height:1.2;margin:.35em 0 .15em}
+  .sub{color:var(--muted);font-size:15px;margin-bottom:8px}
+  .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--accent);
+    border-radius:10px;padding:16px 18px;margin:22px 0 30px;font-size:15px}
+  .q b{color:var(--accent)}
+  h2{font-size:13px;letter-spacing:.1em;text-transform:uppercase;margin:34px 0 12px;
+    display:flex;align-items:center;gap:9px}
+  .dot{width:10px;height:10px;border-radius:50%;flex:none}
+  .block{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:4px 20px}
+  .block ul{margin:14px 0;padding-left:20px}
+  .block li{margin:8px 0}
+  .verdict{background:#1c1b1a;color:#f6f3ee;border-radius:12px;padding:24px 24px 8px;margin:8px 0}
+  .verdict h3{color:#ffb37a;font-size:12px;letter-spacing:.12em;text-transform:uppercase;margin:0 0 6px}
+  .verdict p{margin:0 0 16px;font-size:15.5px}
+  .verdict .rec{font-size:16px}
+  .first-step{background:var(--accent);color:#fff;border-radius:12px;padding:20px 24px;margin:18px 0}
+  .first-step .lab{font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.85}
+  .first-step p{margin:6px 0 0;font-size:16px;font-weight:600}
+  /* spectrum */
+  .spectrum{display:grid;grid-template-columns:1fr;gap:10px;margin:6px 0 4px}
+  .adv{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--card);
+    display:grid;grid-template-columns:130px 1fr;gap:12px;align-items:start}
+  .adv .name{font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:7px}
+  .adv .pos{font-size:13.5px;color:var(--muted)}
+  .pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;color:#fff;margin-left:4px}
+  @media(max-width:560px){.adv{grid-template-columns:1fr}}
+  details{background:var(--card);border:1px solid var(--line);border-radius:10px;margin:10px 0;padding:0 16px}
+  details[open]{padding-bottom:8px}
+  summary{cursor:pointer;padding:13px 0;font-weight:600;font-size:14.5px;list-style:none;
+    display:flex;align-items:center;gap:9px}
+  summary::-webkit-details-marker{display:none}
+  summary .tag{font-size:11px;color:#fff;padding:2px 8px;border-radius:5px;font-weight:700}
+  .adv-body{font-size:14px;color:#2c2a28;padding:2px 0 10px;border-top:1px solid var(--line);margin-top:2px}
+  .adv-body p{margin:12px 0}
+  footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px}
+  code{background:#efece7;padding:1px 5px;border-radius:4px;font-size:12.5px}
+  .converge{background:#f0ede8;border:1px dashed #c9c2b8;border-radius:10px;padding:12px 16px;font-size:13.5px;color:#4a463f;margin:2px 0 6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="kicker">LLM Council · Verdict</div>
+  <h1>How to build a UI for <code>cheap_flights</code></h1>
+  <div class="sub">5 advisors · anonymized peer review · chairman synthesis — 2026-07-08</div>
+</header>
+
+<div class="q">
+  <b>The question.</b> The backend is not a REST API — it's an <b>LLM agent workflow</b> (an Opus playbook run inside Claude Code). Only the Google Flights scraper (<code>scripts/search.js</code>) is callable without a model; Kiwi + lastminute — the only sources with one-click <b>booking links</b> — are MCP tools and were assumed unavailable headless. Hard rules: ≥2 sources, travel-time ceiling, rank on effective fare, every option a booking URL, ≥5 options. Four options weighed: <b>A</b> drive+stream the agent · <b>B</b> thin API over the GF scraper only · <b>C</b> rebuild a normal backend · <b>D</b> viewer over prior results.
+</div>
+
+<!-- POSITIONS -->
+<h2><span class="dot" style="background:var(--accent)"></span>Where each advisor landed</h2>
+<div class="spectrum">
+  <div class="adv"><div class="name"><span class="dot" style="background:var(--contra)"></span>Contrarian</div><div class="pos">A/B/C all misframe ≥2-source as a UI problem — it's runtime availability. B is "a UI that lies." <b>Prove MCP works headless before writing a line.</b></div></div>
+  <div class="adv"><div class="name"><span class="dot" style="background:var(--first)"></span>First Principles</div><div class="pos">A/B/C/D is a false choice. Real variable: <b>must search be synchronous with viewing?</b> No. A + D are one async pipeline. Viewer first, trigger second. Skip B & C.</div></div>
+  <div class="adv"><div class="name"><span class="dot" style="background:var(--expand)"></span>Expansionist</div><div class="pos">The reasoning stream <b>is</b> the product — a "reasoning theater" Kayak can't copy. Render ROUTES.md as a living graph. Start with A, stream as first-class UI.</div></div>
+  <div class="adv"><div class="name"><span class="dot" style="background:var(--outsider)"></span>Outsider</div><div class="pos">Won't wait 60s or pay to search. But needs a real Book button. <b>Fast GF result now, "get real bookable prices" behind a button</b> that triggers the agent.</div></div>
+  <div class="adv"><div class="name"><span class="dot" style="background:var(--exec)"></span>Executor</div><div class="pos">Only B + D is buildable this session, headless & model-free. Ship the viewer in &lt;60 min, wire a Search button, <b>surface the GF-only/no-deeplink gaps honestly.</b></div></div>
+</div>
+
+<!-- AGREE -->
+<h2><span class="dot" style="background:var(--agree)"></span>Where the council agrees</h2>
+<div class="block">
+<ul>
+  <li><b>Search doesn't have to be synchronous.</b> Nobody books a flight in 3 seconds — the pain (cost, latency, auth, non-determinism) all comes from making a human wait on the agent. (First Principles, Outsider, Executor)</li>
+  <li><b>The ≥2-source and booking-link rules are load-bearing</b> — a UI that quietly drops them "lies." (Contrarian, First Principles, Outsider)</li>
+  <li><b>C is the wrong move</b> — rebuilding a conventional backend duplicates the one thing the project already is. (all five)</li>
+  <li><b>The file-reading viewer surface is honest and buildable today</b> against real <code>.captures/*.json</code>. (Executor, First Principles)</li>
+</ul>
+</div>
+
+<!-- CLASH -->
+<h2><span class="dot" style="background:var(--clash)"></span>Where the council clashes</h2>
+<div class="block">
+<ul>
+  <li><b>Speed vs. depth.</b> The Outsider wants an instant, free first result; the Expansionist says the slowness <i>is</i> the product and instant tables are commodity. <span class="pos">Resolution: show the fast result <i>and</i> the deep one — fast GF paint first, agent depth behind an explicit action.</span></li>
+  <li><b>Does B have any legitimate role?</b> The Executor builds on B+D as the only session-shippable thing; the Contrarian calls B "the trap." <span class="pos">Resolution: B is acceptable as a <i>labeled, partial</i> first view — never as the shipped product presented as complete.</span></li>
+  <li><b>Start minimal (viewer) or architect for the full stream?</b> First Principles/Executor say viewer-first; Expansionist says design the reasoning-stream cockpit from day one.</li>
+</ul>
+</div>
+
+<!-- BLIND -->
+<h2><span class="dot" style="background:var(--blind)"></span>Blind spot the council caught (unanimous)</h2>
+<div class="block">
+<div class="converge">All 5 reviewers independently picked the same strongest response (<b>First Principles</b>) and the same biggest blind spot (<b>Expansionist</b>) — and all 5 flagged the same missing move.</div>
+<ul>
+  <li><b>The entire debate rests on an untested assumption.</b> Every advisor treated "Kiwi/lastminute don't work headless" as fact. It isn't — those MCP tools are <b>callable in this very environment</b>. One probe call answers the question that decides A vs. B vs. renegotiating the rules. The council theorized over something it could have measured.</li>
+  <li><b>The Expansionist sold the theater without checking the engine starts</b> — streaming a run that can't produce booking links or a 2nd source is a glass cockpit with no bookable flights.</li>
+  <li><b>Nobody asked whether the hard rules themselves are renegotiable</b> product requirements vs. inherited constraints (Reviewer 4).</li>
+</ul>
+</div>
+
+<!-- VERDICT -->
+<h2><span class="dot" style="background:#ffb37a"></span>The recommendation</h2>
+<div class="verdict">
+  <h3>Chairman's synthesis</h3>
+  <p class="rec">Adopt the <b>async architecture</b> (First Principles): decouple <i>finding the truth</i> from <i>acting on it</i>. Build the <b>results-viewer surface first</b> — it reads <code>.captures/*.json</code> and is honest against real data today. Wire an <b>async agent trigger second</b>: the UI submits a route, the agent run writes files (with booking links), the viewer reads them.</p>
+  <p>Fold in the <b>Outsider's UX truth</b>: paint the fast Google-Flights result immediately, clearly labeled <i>"1 source, prices only"</i>, with a <b>"Get real bookable prices"</b> action that kicks the full agent run. This fuses B's fast first-paint with A's depth — satisfying the correctness rules <i>by disclosure</i>, not by pretending. Keep the Expansionist's reasoning-stream + living ROUTES.md graph as the phase-2 north star. <b>Skip C.</b></p>
+  <p><b>But the architecture is gated on one fact</b> the council never checked — whether the MCP booking sources actually work in an automated run. Measure it before committing.</p>
+</div>
+
+<div class="first-step">
+  <div class="lab">The one thing to do first</div>
+  <p>Run the probe: call the Kiwi <code>search-flight</code> and lastminute <code>generate_booking_link</code> MCP tools once, right now, and confirm whether they return results + a real booking URL in this environment. That single fact decides how much of the plan is buildable — build the viewer immediately after.</p>
+</div>
+
+<!-- FULL RESPONSES -->
+<h2><span class="dot" style="background:var(--muted)"></span>Full advisor responses</h2>
+
+<details><summary><span class="tag" style="background:var(--contra)">Contrarian</span> The ≥2-source rule is a runtime problem, not a UI one</summary>
+<div class="adv-body">
+<p>The framing hides the real fault line: A, B, and C all pretend the ≥2-source rule is a UI problem when it's actually a runtime-availability problem. Kiwi and lastminute are MCP servers callable only through a model tool-call, and absent in headless runs. That single fact quietly kills B and D, cripples C, and makes A far worse than advertised.</p>
+<p><b>B is the trap.</b> "Fast, cheap, headless" — and it structurally cannot satisfy your own hard rules. One source, no booking URL, no cross-check. You'd ship a UI that violates every correctness invariant the project exists to enforce. That's the "beautiful UI that lies."</p>
+<p><b>A's hidden killer is auth, not speed.</b> If MCP can't authenticate non-interactively, even Option A can't reliably produce booking links or a second source. Has anyone confirmed MCP works outside an interactive Claude Code session? That's the question everyone's avoiding.</p>
+<p>C duplicates the agent yet has no legal 2nd-source API to reimplement. D isn't a strategy, it's a screenshot. Before writing one line: prove MCP can be driven programmatically and produce a booking link headlessly. If it can't, your only honest options are A (accept slow/costly/interactive) or explicitly renegotiate the ≥2-source rule.</p>
+</div></details>
+
+<details><summary><span class="tag" style="background:var(--first)">First Principles</span> Must search be synchronous with viewing? No.</summary>
+<div class="adv-body">
+<p>You're treating "the UI" as one thing. It isn't, and that's the whole confusion.</p>
+<p>A flight search has two jobs welded together: <b>Job 1 — find the truth</b> (cross-check, rank effective fare, verify — the expensive, non-deterministic agent work, already built). <b>Job 2 — let a human act on it</b> (browse, click a booking link — cheap, deterministic, where the impeccable-UI value lives).</p>
+<p>So the real question isn't A/B/C/D. It's: must search be synchronous with viewing? Everything painful comes from forcing a human to wait while an Opus agent thinks. Nobody books a flight in the 3 seconds an API returns.</p>
+<p>That collapses the false choice. A and D aren't rivals — they're two ends of one async pipeline: the UI submits a route (kicks an agent run), the run writes <code>.captures/*.json</code> + booking links to files, and the UI reads them. B and C exist only to fake synchrony, and each breaks a hard rule to do it.</p>
+<p>Build the viewer first (D) — honest today against real captures. Wire the async trigger (A) second. Skip B and C. The user wants a right answer, not a fast one.</p>
+</div></details>
+
+<details><summary><span class="tag" style="background:var(--expand)">Expansionist</span> This isn't a flight site — it's a reasoning theater</summary>
+<div class="adv-body">
+<p>Every flight site shows a sorted table. None show the thinking. Option A's "slow and non-deterministic" is the product, not the bug. Watching Opus expand "cheap Lisbon in October" into gateway nodes, fire five sub-agents, and catch a fare that's a mirage on effective cost — that's a moat Kayak structurally cannot copy. Trust compounds when you see the work.</p>
+<p><b>ROUTES.md is the sleeper asset.</b> Render it as a live route-topology graph — gateway nodes brightening with confidence, decaying edges fading. Every search enriches a shared brain. A data flywheel hiding inside a markdown file. Expose it.</p>
+<p><b>The 10x version:</b> not a search box but a glass-cockpit trip planner where the reasoning stream is the interface — expandable plan cards, live sub-agent status, an interactive ROUTES.md graph, one-click booking links the instant judgment lands, the user steering mid-flight.</p>
+<p>Start with A, architect the stream as first-class UI. B and D are demos of a corpse; C rebuilds the one differentiated thing. Ship the reasoning.</p>
+</div></details>
+
+<details><summary><span class="tag" style="background:var(--outsider)">Outsider</span> I don't want to watch a robot think — I want a plane ticket</summary>
+<div class="adv-body">
+<p><b>Option A</b> sounds cool for ten seconds, then I'd hate it. Sixty seconds is an eternity — I abandon sites that take four. And it costs money to search? I'm gone. But A is the only one with real Book buttons; a result I can't book is a screenshot.</p>
+<p><b>Option B</b> feels great and is broken as a product: instant and free, but no booking links = a fast dead end. <b>Option C</b> is a long project — not the question. <b>Option D</b> is a museum.</p>
+<p>What would feel best: the speed of B with the booking links of A. Start with the fast free scraper for an instant result, show options immediately, and put a <b>"Get real bookable prices"</b> button that triggers the slow/expensive agent only when I've decided I care. Ship B's frontend now, wired so A plugs in behind that button.</p>
+</div></details>
+
+<details><summary><span class="tag" style="background:var(--exec)">Executor</span> B + D fused — the only thing buildable this session</summary>
+<div class="adv-body">
+<p>Build B + D fused into one app — the only thing that runs headless, model-free, and demoable this session. A and C are dead on arrival: A needs interactive MCP auth you don't have; C is a rewrite.</p>
+<p>Order: (1) <b>Read-only harness</b> — <code>server.js</code> shells out to <code>node /workspaces/other_project/scripts/search.js</code>, reads the capture JSON, serves it; never write into the read-only backend. (2) <b>Ship the viewer first</b> — point the frontend at an existing <code>gflights_results.json</code> → a real ranked table in &lt;60 min. (3) <b>Wire a Search button</b> → POST → repaint = live, deterministic, GF-only.</p>
+<p><b>No-display reality:</b> never headed; drive/verify with headless Playwright + screenshots/trace. Surface gaps honestly: GF-only → show "Kiwi/lastminute unavailable headless"; no deeplink → link to GF search, mark it. Booking links + multi-source wait for interactive mode.</p>
+</div></details>
+
+<details><summary><span class="tag" style="background:var(--muted)">Peer review</span> Highlights from the anonymized review round</summary>
+<div class="adv-body">
+<p><b>Unanimous strongest:</b> First Principles (5/5) — the only response that reframes the menu instead of picking from it.</p>
+<p><b>Unanimous biggest blind spot:</b> Expansionist (5/5) — bets everything on the reasoning stream without checking the agent can produce bookable output at all.</p>
+<p><b>What all five missed (5/5 reviewers):</b> the MCP booking sources are present as callable tools in this environment; the "absent headless" premise that kills B/D and cripples C is assertion, not tested fact. A single probe call would settle the whole debate. Reviewer 4 also noted nobody questioned whether the hard rules themselves are renegotiable.</p>
+</div></details>
+
+<footer>
+  Counciled 2026-07-08 · question: UI strategy for the <code>cheap_flights</code> agent backend · method: 5 advisors → anonymized peer review → chairman synthesis (Karpathy's LLM Council). Full transcript: <code>docs/council-transcript-2026-07-08.md</code>. Project report: <code>docs/cheap-flights-report.md</code>.
+</footer>
+</div>
+</body>
+</html>
