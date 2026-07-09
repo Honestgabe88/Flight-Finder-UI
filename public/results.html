@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Your flights — Now is Now</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    .results-wrap { max-width: 760px; margin: 5vh auto; padding: 0 1.25rem; }
+    h1 { color: var(--pink); }
+    .card { border: 2px solid var(--pink-soft); border-radius: 16px; padding: 1.1rem 1.25rem;
+      margin: 1rem 0; display: grid; grid-template-columns: 1fr auto; gap: .5rem 1rem; align-items: center; }
+    .price { font-size: 1.8rem; font-weight: 700; color: var(--ink); }
+    .route { font-weight: 600; } .meta { color: #555; font-size: .92rem; }
+    .tag { display: inline-block; font-size: .72rem; text-transform: uppercase; letter-spacing: .04em;
+      background: var(--pink-soft); color: #c41d63; padding: .15rem .5rem; border-radius: 999px; }
+    .approx { color: #b06; font-size: .8rem; }
+    .empty, .notes { text-align: center; color: #555; margin: 2rem 0; }
+    .notes { font-size: .88rem; }
+  </style>
+</head>
+<body>
+  <main class="results-wrap">
+    <h1>Cheapest reasonable flights</h1>
+    <div id="cards"></div>
+    <div class="notes" id="notes"></div>
+    <p class="empty"><a class="btn" href="/search.html">New search</a></p>
+  </main>
+  <script>
+    const id = new URLSearchParams(location.search).get('id');
+    const cardsEl = document.getElementById('cards');
+    const notesEl = document.getElementById('notes');
+    const fmtTime = (t) => t || '';
+    const fmtDur = (m) => m == null ? '' : `${Math.floor(m/60)}h ${m%60}m`;
+    const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+    function render(env) {
+      const options = env.options || [];
+      if (!options.length) {
+        cardsEl.innerHTML = '<p class="empty">No flights found — try different dates or airports.</p>';
+      } else {
+        cardsEl.innerHTML = options.map((o) => `
+          <div class="card">
+            <div>
+              <div class="route">${(o.route||[]).join(' → ')} <span class="tag">seen on ${cap(o.source)}</span></div>
+              <div class="meta">${o.airline||''} · ${o.stops===0?'nonstop':o.stops+' stop'+(o.stops>1?'s':'')} · ${fmtDur(o.durationMin)}</div>
+              <div class="meta">${fmtTime(o.depTime)} → ${fmtTime(o.arrTime)}</div>
+            </div>
+            <div style="text-align:right">
+              <div class="price">${o.approxPrice?'~':''}$${o.priceUsd}</div>
+              ${o.approxPrice?'<div class="approx">approx (converted)</div>':''}
+              <a class="btn" href="${o.bookingUrl}" target="_blank" rel="noopener">Book</a>
+            </div>
+          </div>`).join('');
+      }
+      notesEl.textContent = (env.notes || []).join('  ·  ');
+    }
+
+    async function load() {
+      try {
+        const res = await fetch(id ? `/status?id=${encodeURIComponent(id)}` : '/sample-results.json');
+        render(await res.json());
+      } catch (_) {
+        const res = await fetch('/sample-results.json'); render(await res.json());
+      }
+    }
+    load();
+  </script>
+</body>
+</html>
