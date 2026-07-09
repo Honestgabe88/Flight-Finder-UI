@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Now is Now — cheap flights</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    .hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 2rem; text-align: center; }
+    .globe { width: 160px; height: 160px; border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #ff8cc6, var(--pink) 60%, #d81b78);
+      box-shadow: inset -12px -12px 30px rgba(0,0,0,.25), 0 10px 30px rgba(255,79,163,.4);
+      position: relative; overflow: hidden; animation: spin 12s linear infinite; }
+    .globe::before, .globe::after { content: ""; position: absolute; inset: 0;
+      background: repeating-linear-gradient(90deg, transparent 0 18px, rgba(255,255,255,.18) 18px 20px);
+      border-radius: 50%; }
+    .globe::after { background: repeating-linear-gradient(0deg, transparent 0 22px, rgba(255,255,255,.12) 22px 24px); }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .globe { animation: none; } }
+    .tagline { color: var(--pink); font-weight: 600; letter-spacing: .02em; }
+  </style>
+</head>
+<body>
+  <main class="hero">
+    <div class="globe" role="img" aria-label="Pink spinning globe"></div>
+    <div id="marquee-mount" style="width:100%"></div>
+    <p class="tagline">Stop saying next time.</p>
+    <a class="btn" href="/search.html">Find me a flight →</a>
+  </main>
+  <script src="/marquee.js"></script>
+  <script>buildMarquee('#marquee-mount');</script>
+</body>
+</html>
