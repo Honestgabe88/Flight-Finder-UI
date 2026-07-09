@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Searching… — Now is Now</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    .load-wrap { min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 2.5rem; text-align: center; }
+    .status { color: var(--ink); opacity: .7; font-size: 1.05rem; }
+    .plane { font-size: 2rem; animation: fly 3s ease-in-out infinite; }
+    @keyframes fly { 0%{transform:translateX(-40px)} 50%{transform:translateX(40px) translateY(-8px)} 100%{transform:translateX(-40px)} }
+  </style>
+</head>
+<body>
+  <main class="load-wrap">
+    <div class="plane" aria-hidden="true">🛫</div>
+    <div id="marquee-mount" style="width:100%"></div>
+    <p class="status" id="status">Searching Kiwi, lastminute, Google…</p>
+  </main>
+  <script src="/marquee.js"></script>
+  <script>
+    buildMarquee('#marquee-mount');
+    const id = new URLSearchParams(location.search).get('id');
+    const statusEl = document.getElementById('status');
+    if (!id) { location.href = '/search.html'; }
+    async function poll() {
+      try {
+        const res = await fetch(`/status?id=${encodeURIComponent(id)}`);
+        const data = await res.json();
+        if (data.status === 'done') { location.href = `/results.html?id=${encodeURIComponent(id)}`; return; }
+        if (data.status === 'error') { statusEl.textContent = 'Something went wrong: ' + (data.message || 'unknown') + ' — go back and try again.'; return; }
+      } catch (_) { /* keep waiting */ }
+      setTimeout(poll, 2500);
+    }
+    poll();
+  </script>
+</body>
+</html>
