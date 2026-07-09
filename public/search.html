@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Where to? — Now is Now</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    .form-wrap { max-width: 520px; margin: 8vh auto; padding: 0 1.25rem; }
+    h1 { color: var(--pink); }
+    label { display: block; margin: 1rem 0 .35rem; font-weight: 600; }
+    input { width: 100%; padding: .8rem 1rem; border: 2px solid var(--pink-soft);
+      border-radius: 12px; font-size: 1rem; }
+    input:focus { outline: none; border-color: var(--pink); }
+    .row { display: flex; gap: 1rem; } .row > div { flex: 1; }
+    .error { color: #c41d63; min-height: 1.2rem; margin-top: .75rem; }
+    .btn { margin-top: 1.25rem; width: 100%; text-align: center; }
+  </style>
+</head>
+<body>
+  <main class="form-wrap">
+    <h1>Where to?</h1>
+    <form id="search-form" novalidate>
+      <label for="origin">From</label>
+      <input id="origin" name="origin" placeholder="Miami (city or airport)" />
+      <label for="dest">To</label>
+      <input id="dest" name="dest" placeholder="Bogota (city or airport)" />
+      <div class="row">
+        <div><label for="departDate">Depart</label><input id="departDate" name="departDate" type="date" /></div>
+        <div><label for="returnDate">Return (optional)</label><input id="returnDate" name="returnDate" type="date" /></div>
+      </div>
+      <div class="error" id="error" role="alert"></div>
+      <button class="btn" type="submit">Search flights</button>
+    </form>
+  </main>
+  <script src="/app.js"></script>
+  <script>
+    const form = document.getElementById('search-form');
+    const errEl = document.getElementById('error');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errEl.textContent = '';
+      const body = {
+        origin: form.origin.value.trim(),
+        dest: form.dest.value.trim(),
+        departDate: form.departDate.value,
+        returnDate: form.returnDate.value || null,
+      };
+      if (!body.origin || !body.dest || !body.departDate) {
+        errEl.textContent = 'Please fill in From, To, and a Depart date.';
+        return;
+      }
+      try {
+        const { id } = await window.postJSON('/search', body);
+        window.location.href = `/loading.html?id=${encodeURIComponent(id)}`;
+      } catch (err) {
+        errEl.textContent = 'Could not start the search. Is the server running?';
+      }
+    });
+  </script>
+</body>
+</html>
