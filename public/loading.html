@@ -6,31 +6,62 @@
   <title>Searching… — Now is Now</title>
   <link rel="stylesheet" href="/styles.css" />
   <style>
-    .load-wrap { min-height: 100vh; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; gap: 2.5rem; text-align: center; }
-    .status { color: var(--ink); opacity: .7; font-size: 1.05rem; }
-    .plane { font-size: 2rem; animation: fly 3s ease-in-out infinite; }
-    @keyframes fly { 0%{transform:translateX(-40px)} 50%{transform:translateX(40px) translateY(-8px)} 100%{transform:translateX(-40px)} }
+    .load-wrap {
+      min-height: 100svh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: var(--sp-7); text-align: center;
+    }
+    .plane-lane { position: relative; width: 180px; height: 44px; }
+    .plane {
+      position: absolute; top: 4px; left: 0; font-size: 2rem;
+      animation: fly 3.4s var(--ease) infinite;
+      filter: drop-shadow(0 4px 5px rgba(120,0,50,.22));
+    }
+    .plane-lane::after {
+      content: ""; position: absolute; left: 8px; right: 8px; top: 50%; height: 2px;
+      background: repeating-linear-gradient(90deg, var(--pink-soft) 0 8px, transparent 8px 16px);
+      opacity: .8;
+    }
+    @keyframes fly {
+      0%   { transform: translateX(0) translateY(0) rotate(6deg); }
+      50%  { transform: translateX(140px) translateY(-10px) rotate(0deg); }
+      100% { transform: translateX(0) translateY(0) rotate(6deg); }
+    }
+    @media (prefers-reduced-motion: reduce) { .plane { animation: none; } }
+
+    .status { color: var(--ink); font-size: 1.15rem; font-weight: 600; }
+    .status .dots::after { content: "…"; animation: dots 1.4s steps(4, end) infinite; }
+    @keyframes dots { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "…"; } }
+    .subnote { color: var(--ink-muted); font-size: .92rem; margin-top: var(--sp-2); }
+    .error-actions { margin-top: var(--sp-4); }
   </style>
 </head>
 <body>
   <main class="load-wrap">
-    <div class="plane" aria-hidden="true">🛫</div>
+    <div class="plane-lane" aria-hidden="true"><span class="plane">🛫</span></div>
     <div id="marquee-mount" style="width:100%"></div>
-    <p class="status" id="status">Searching Kiwi, lastminute, Google…</p>
+    <div>
+      <p class="status" id="status" role="status">Searching Kiwi, lastminute &amp; Google<span class="dots"></span></p>
+      <p class="subnote" id="subnote">Real fares take a moment — hang tight, this can take a minute.</p>
+    </div>
   </main>
   <script src="/marquee.js"></script>
   <script>
     buildMarquee('#marquee-mount');
     const id = new URLSearchParams(location.search).get('id');
     const statusEl = document.getElementById('status');
+    const subnote = document.getElementById('subnote');
     if (!id) { location.href = '/search.html'; }
     async function poll() {
       try {
         const res = await fetch(`/status?id=${encodeURIComponent(id)}`);
         const data = await res.json();
         if (data.status === 'done') { location.href = `/results.html?id=${encodeURIComponent(id)}`; return; }
-        if (data.status === 'error') { statusEl.textContent = 'Something went wrong: ' + (data.message || 'unknown') + ' — go back and try again.'; return; }
+        if (data.status === 'error') {
+          statusEl.innerHTML = 'Something went wrong';
+          subnote.innerHTML = (data.message || 'Unknown error') +
+            ' <span class="error-actions"><a class="btn btn--ghost" href="/search.html">Try again</a></span>';
+          return;
+        }
       } catch (_) { /* keep waiting */ }
       setTimeout(poll, 2500);
     }

@@ -6,31 +6,75 @@
   <title>Your flights — Now is Now</title>
   <link rel="stylesheet" href="/styles.css" />
   <style>
-    .results-wrap { max-width: 760px; margin: 5vh auto; padding: 0 1.25rem; }
-    h1 { color: var(--pink); }
-    .card { border: 2px solid var(--pink-soft); border-radius: 16px; padding: 1.1rem 1.25rem;
-      margin: 1rem 0; display: grid; grid-template-columns: 1fr auto; gap: .5rem 1rem; align-items: center; }
-    .price { font-size: 1.8rem; font-weight: 700; color: var(--ink); }
-    .route { font-weight: 600; } .meta { color: #555; font-size: .92rem; }
-    .tag { display: inline-block; font-size: .72rem; text-transform: uppercase; letter-spacing: .04em;
-      background: var(--pink-soft); color: #c41d63; padding: .15rem .5rem; border-radius: 999px; }
-    .approx { color: #b06; font-size: .8rem; }
-    .empty, .notes { text-align: center; color: #555; margin: 2rem 0; }
-    .notes { font-size: .88rem; }
+    .results-wrap { max-width: 780px; margin: 0 auto; padding: var(--sp-7) var(--sp-5) var(--sp-8); }
+    .results-head { margin-bottom: var(--sp-6); }
+    .results-head h1 { font-size: clamp(1.7rem, 5vw, 2.4rem); font-weight: 800; }
+    .results-head .summary { color: var(--ink-muted); margin-top: var(--sp-2); font-size: 1.02rem; }
+    .results-head .route-summary { color: var(--ink); font-weight: 650; }
+
+    .flights { display: flex; flex-direction: column; gap: var(--sp-4); }
+    .flight {
+      position: relative; display: grid; grid-template-columns: 1fr auto; gap: var(--sp-4);
+      align-items: center; background: var(--surface); border: 1px solid var(--line);
+      border-radius: var(--r-lg); padding: var(--sp-5); box-shadow: var(--shadow-sm);
+      transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease), border-color var(--dur) var(--ease);
+    }
+    .flight:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: var(--pink-soft); }
+    .flight--best { border-color: var(--pink); box-shadow: 0 0 0 1px var(--pink), var(--shadow-md); }
+    .flight__badge {
+      position: absolute; top: -11px; left: var(--sp-5);
+      background: var(--pink); color: #fff; font-size: .7rem; font-weight: 700;
+      letter-spacing: .04em; text-transform: uppercase; padding: .22rem .65rem;
+      border-radius: var(--r-pill); box-shadow: var(--glow);
+    }
+    .flight__route { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; }
+    .route { font-weight: 700; font-size: 1.18rem; letter-spacing: -.01em; }
+    .source-chip {
+      font-size: .68rem; text-transform: uppercase; letter-spacing: .05em; font-weight: 700;
+      color: var(--pink-deep); background: var(--pink-tint); border: 1px solid var(--pink-soft);
+      padding: .16rem .55rem; border-radius: var(--r-pill);
+    }
+    .flight__meta { color: var(--ink-muted); font-size: .92rem; margin-top: .4rem; }
+    .flight__times { color: var(--ink); font-size: .95rem; margin-top: .2rem; font-variant-numeric: tabular-nums; }
+
+    .flight__aside { display: flex; flex-direction: column; align-items: flex-end; gap: .5rem; text-align: right; }
+    .flight__price { font-size: 1.7rem; font-weight: 800; letter-spacing: -.02em; font-variant-numeric: tabular-nums; line-height: 1; }
+    .flight__price .approx { display: block; margin-top: .25rem; font-size: .7rem; font-weight: 500; color: var(--pink-deep); }
+    .flight .btn { padding: .6rem 1.35rem; font-size: .95rem; }
+
+    .notes { text-align: center; color: var(--ink-muted); font-size: .9rem; margin: var(--sp-6) 0 var(--sp-4); }
+    .empty { text-align: center; padding: var(--sp-8) var(--sp-4); color: var(--ink-muted); }
+    .empty p { font-size: 1.1rem; margin-bottom: var(--sp-5); }
+    .footer-cta { text-align: center; margin-top: var(--sp-7); }
+
+    @media (max-width: 520px) {
+      .flight { grid-template-columns: 1fr; }
+      .flight__aside { flex-direction: row; align-items: center; justify-content: space-between; text-align: left; }
+    }
   </style>
 </head>
 <body>
+  <header class="site-header">
+    <a class="brand" href="/"><span class="brand__globe" aria-hidden="true"></span>Now is Now</a>
+    <a class="btn btn--ghost" href="/search.html">New search</a>
+  </header>
+
   <main class="results-wrap">
-    <h1>Cheapest reasonable flights</h1>
-    <div id="cards"></div>
+    <div class="results-head" id="results-head">
+      <h1>Cheapest reasonable flights</h1>
+    </div>
+    <div class="flights" id="cards"></div>
     <div class="notes" id="notes"></div>
-    <p class="empty"><a class="btn" href="/search.html">New search</a></p>
+    <div class="footer-cta"><a class="btn" href="/search.html">Search again</a></div>
   </main>
+
   <script>
     const id = new URLSearchParams(location.search).get('id');
+    const headEl = document.getElementById('results-head');
     const cardsEl = document.getElementById('cards');
     const notesEl = document.getElementById('notes');
-    // Humanize ISO timestamps (2026-08-13T06:24:00 → "6:24 AM"); pass through
+
+    // Humanize ISO timestamps (2026-08-13T06:24:00 -> "6:24 AM"); pass through
     // already-friendly strings (Google gives "10:00 AM").
     const fmtTime = (t) => {
       if (!t) return '';
@@ -40,29 +84,69 @@
       h = h % 12 || 12;
       return `${h}:${m[2]} ${ap}`;
     };
-    const fmtDur = (m) => m == null ? '' : `${Math.floor(m/60)}h ${m%60}m`;
-    const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+    const fmtDur = (m) => m == null ? '' : `${Math.floor(m / 60)}h ${m % 60}m`;
+    const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
+    const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const fmtDate = (d) => { if (!d) return ''; const [, mo, da] = d.split('-'); return `${MON[+mo - 1]} ${+da}`; };
+
+    // Unify route labels: keep IATA codes (MIA), abbreviate long airport names
+    // ("Fort Lauderdale-Hollywood International Airport" -> "Fort Lauderdale").
+    function fmtPlace(p) {
+      if (!p) return '';
+      if (/^[A-Z]{2,4}$/.test(p)) return p;
+      let s = p.replace(/\b(International|Intl|Regional|Municipal|Airport|Airfield)\b/gi, ' ')
+               .replace(/\s{2,}/g, ' ').trim();
+      if (s.includes('-')) s = s.split('-')[0].trim();
+      return s || p;
+    }
+    const routeStr = (route) => (route || []).map(fmtPlace).join(' → ');
+    const stopsLabel = (n) => n === 0 ? 'nonstop' : `${n} stop${n > 1 ? 's' : ''}`;
+
+    function renderHead(env) {
+      const q = env.query || {};
+      const n = (env.options || []).length;
+      const trip = q.origin && q.dest
+        ? `<span class="route-summary">${q.origin} → ${q.dest}</span>`
+        : '';
+      const when = q.departDate ? ` · ${fmtDate(q.departDate)}${q.returnDate ? ' – ' + fmtDate(q.returnDate) : ''}` : '';
+      headEl.innerHTML = `
+        <h1>Cheapest reasonable flights</h1>
+        <p class="summary">${n} option${n === 1 ? '' : 's'}${trip ? ' · ' + trip : ''}${when}</p>`;
+    }
+
+    function renderCard(o, isBest) {
+      const approx = o.approxPrice;
+      return `
+        <article class="flight${isBest ? ' flight--best' : ''}">
+          ${isBest ? '<span class="flight__badge">Cheapest</span>' : ''}
+          <div>
+            <div class="flight__route">
+              <span class="route">${routeStr(o.route)}</span>
+              <span class="source-chip"><span class="sr-only">seen on </span>${cap(o.source)}</span>
+            </div>
+            <div class="flight__meta">${o.airline || ''} · ${stopsLabel(o.stops)} · ${fmtDur(o.durationMin)}</div>
+            <div class="flight__times">${fmtTime(o.depTime)} → ${fmtTime(o.arrTime)}</div>
+          </div>
+          <div class="flight__aside">
+            <div class="flight__price">${approx ? '~' : ''}$${o.priceUsd}${approx ? '<span class="approx">approx · converted</span>' : ''}</div>
+            <a class="btn" href="${o.bookingUrl}" target="_blank" rel="noopener">Book →</a>
+          </div>
+        </article>`;
+    }
 
     function render(env) {
+      renderHead(env);
       const options = env.options || [];
       if (!options.length) {
-        cardsEl.innerHTML = '<p class="empty">No flights found — try different dates or airports.</p>';
+        cardsEl.innerHTML = `
+          <div class="empty">
+            <p>No flights found for this route — try different dates or nearby airports.</p>
+            <a class="btn" href="/search.html">Try another search</a>
+          </div>`;
       } else {
-        cardsEl.innerHTML = options.map((o) => `
-          <div class="card">
-            <div>
-              <div class="route">${(o.route||[]).join(' → ')} <span class="tag">seen on ${cap(o.source)}</span></div>
-              <div class="meta">${o.airline||''} · ${o.stops===0?'nonstop':o.stops+' stop'+(o.stops>1?'s':'')} · ${fmtDur(o.durationMin)}</div>
-              <div class="meta">${fmtTime(o.depTime)} → ${fmtTime(o.arrTime)}</div>
-            </div>
-            <div style="text-align:right">
-              <div class="price">${o.approxPrice?'~':''}$${o.priceUsd}</div>
-              ${o.approxPrice?'<div class="approx">approx (converted)</div>':''}
-              <a class="btn" href="${o.bookingUrl}" target="_blank" rel="noopener">Book</a>
-            </div>
-          </div>`).join('');
+        cardsEl.innerHTML = options.map((o, i) => renderCard(o, i === 0)).join('');
       }
-      notesEl.textContent = (env.notes || []).join('  ·  ');
+      notesEl.textContent = (env.notes || []).join('   ·   ');
     }
 
     async function load() {

@@ -3,30 +3,74 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Now is Now — cheap flights</title>
+  <title>Now is Now — cheap flights, booked now</title>
   <link rel="stylesheet" href="/styles.css" />
   <style>
-    .hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center;
-      justify-content: center; gap: 2rem; text-align: center; }
-    .globe { width: 160px; height: 160px; border-radius: 50%;
-      background: radial-gradient(circle at 35% 30%, #ff8cc6, var(--pink) 60%, #d81b78);
-      box-shadow: inset -12px -12px 30px rgba(0,0,0,.25), 0 10px 30px rgba(255,79,163,.4);
-      position: relative; overflow: hidden; animation: spin 12s linear infinite; }
-    .globe::before, .globe::after { content: ""; position: absolute; inset: 0;
-      background: repeating-linear-gradient(90deg, transparent 0 18px, rgba(255,255,255,.18) 18px 20px);
-      border-radius: 50%; }
-    .globe::after { background: repeating-linear-gradient(0deg, transparent 0 22px, rgba(255,255,255,.12) 22px 24px); }
+    .hero { min-height: 100svh; display: grid; grid-template-rows: 1fr auto; }
+    .hero__inner {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; gap: var(--sp-6); padding: var(--sp-8) var(--sp-5) var(--sp-6);
+    }
+    /* --- Globe stage --- */
+    .stage { position: relative; width: 240px; height: 240px; display: grid; place-items: center; }
+    .stage::before {
+      content: ""; position: absolute; inset: -22%;
+      background: radial-gradient(circle, rgba(255,61,154,.30), transparent 62%);
+      filter: blur(4px);
+    }
+    .globe {
+      position: relative; width: 176px; height: 176px; border-radius: 50%; overflow: hidden;
+      background: radial-gradient(circle at 33% 27%, #ffb0da, var(--pink) 56%, #b81259 100%);
+      box-shadow:
+        inset -16px -18px 36px rgba(90,0,40,.42),
+        inset 9px 11px 22px rgba(255,255,255,.38),
+        0 20px 44px rgba(255,61,154,.36);
+      animation: spin 18s linear infinite;
+    }
+    .globe::before, .globe::after { content: ""; position: absolute; inset: 0; border-radius: 50%; opacity: .55; }
+    .globe::before { background: repeating-linear-gradient(90deg, transparent 0 20px, rgba(255,255,255,.30) 20px 21px); }
+    .globe::after  {
+      background: repeating-linear-gradient(0deg, transparent 0 22px, rgba(255,255,255,.22) 22px 23px);
+      -webkit-mask: radial-gradient(circle, #000 58%, transparent 74%);
+              mask: radial-gradient(circle, #000 58%, transparent 74%);
+    }
     @keyframes spin { to { transform: rotate(360deg); } }
-    @media (prefers-reduced-motion: reduce) { .globe { animation: none; } }
-    .tagline { color: var(--pink); font-weight: 600; letter-spacing: .02em; }
+    .orbit { position: absolute; inset: 4px; animation: orbit 11s linear infinite; }
+    .orbit__plane {
+      position: absolute; top: -10px; left: 50%; transform: translateX(-50%) rotate(45deg);
+      font-size: 1.6rem; filter: drop-shadow(0 3px 4px rgba(120,0,50,.28));
+    }
+    @keyframes orbit { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .globe, .orbit { animation: none; } }
+
+    /* --- Copy --- */
+    .headline { font-size: clamp(2.5rem, 8vw, 4.4rem); font-weight: 800; }
+    .headline em { font-style: normal; color: var(--pink-deep); }
+    .sub { max-width: 32ch; color: var(--ink-muted); font-size: 1.1rem; }
+    .cta-row { display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); }
+    .cta-note { font-size: .9rem; color: var(--ink-muted); }
+
+    /* --- Marquee band --- */
+    .marquee-band { padding: var(--sp-5) 0 var(--sp-7); border-top: 1px solid var(--line); }
   </style>
 </head>
 <body>
   <main class="hero">
-    <div class="globe" role="img" aria-label="Pink spinning globe"></div>
-    <div id="marquee-mount" style="width:100%"></div>
-    <p class="tagline">Stop saying next time.</p>
-    <a class="btn" href="/search.html">Find me a flight →</a>
+    <div class="hero__inner">
+      <div class="stage">
+        <div class="globe" role="img" aria-label="A spinning pink globe"></div>
+        <div class="orbit" aria-hidden="true"><span class="orbit__plane">✈️</span></div>
+      </div>
+      <h1 class="headline">Stop saying <em>next&nbsp;time.</em></h1>
+      <p class="sub">Real fares from Kiwi, lastminute &amp; Google — each with a booking link, found right now.</p>
+      <div class="cta-row">
+        <a class="btn" href="/search.html">Find me a flight&nbsp;&rarr;</a>
+        <span class="cta-note">今度は今度、今は今</span>
+      </div>
+    </div>
+    <div class="marquee-band">
+      <div id="marquee-mount"></div>
+    </div>
   </main>
   <script src="/marquee.js"></script>
   <script>buildMarquee('#marquee-mount');</script>

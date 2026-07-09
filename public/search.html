@@ -6,37 +6,66 @@
   <title>Where to? — Now is Now</title>
   <link rel="stylesheet" href="/styles.css" />
   <style>
-    .form-wrap { max-width: 520px; margin: 8vh auto; padding: 0 1.25rem; }
-    h1 { color: var(--pink); }
-    label { display: block; margin: 1rem 0 .35rem; font-weight: 600; }
-    input { width: 100%; padding: .8rem 1rem; border: 2px solid var(--pink-soft);
-      border-radius: 12px; font-size: 1rem; }
-    input:focus { outline: none; border-color: var(--pink); }
-    .row { display: flex; gap: 1rem; } .row > div { flex: 1; }
-    .error { color: #c41d63; min-height: 1.2rem; margin-top: .75rem; }
-    .btn { margin-top: 1.25rem; width: 100%; text-align: center; }
+    .form-wrap { max-width: 540px; margin: 0 auto; padding: var(--sp-8) var(--sp-5) var(--sp-7); }
+    .form-head { margin-bottom: var(--sp-6); }
+    .form-head h1 { font-size: clamp(2rem, 6vw, 2.8rem); font-weight: 800; }
+    .form-head p { color: var(--ink-muted); margin-top: var(--sp-2); }
+
+    .field { margin-top: var(--sp-4); }
+    label { display: block; margin-bottom: .4rem; font-weight: 600; font-size: .95rem; }
+    label .opt { color: var(--ink-muted); font-weight: 400; }
+    input {
+      width: 100%; padding: .85rem 1rem; font: inherit; font-size: 1rem;
+      color: var(--ink); background: var(--surface);
+      border: 1.5px solid var(--line); border-radius: var(--r-md);
+      transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+    }
+    input::placeholder { color: #a99caf; }
+    input:hover { border-color: var(--pink-soft); }
+    input:focus { outline: none; border-color: var(--pink); box-shadow: 0 0 0 4px rgba(255,61,154,.16); }
+
+    .row { display: flex; gap: var(--sp-4); }
+    .row > .field { flex: 1; margin-top: var(--sp-4); }
+
+    .error { color: var(--pink-deep); min-height: 1.3rem; margin-top: var(--sp-3); font-size: .95rem; font-weight: 500; }
+    form .btn { margin-top: var(--sp-4); width: 100%; }
+    @media (max-width: 460px) { .row { flex-direction: column; gap: 0; } }
   </style>
 </head>
 <body>
+  <header class="site-header">
+    <a class="brand" href="/"><span class="brand__globe" aria-hidden="true"></span>Now is Now</a>
+    <a class="btn--ghost btn" href="/" style="box-shadow:none">Home</a>
+  </header>
+
   <main class="form-wrap">
-    <h1>Where to?</h1>
+    <div class="form-head">
+      <h1>Where to?</h1>
+      <p>Two cities and a date. We’ll compare Kiwi, lastminute &amp; Google and bring back the five best.</p>
+    </div>
     <form id="search-form" novalidate>
-      <label for="origin">From</label>
-      <input id="origin" name="origin" placeholder="Miami (city or airport)" />
-      <label for="dest">To</label>
-      <input id="dest" name="dest" placeholder="Bogota (city or airport)" />
+      <div class="field">
+        <label for="origin">From</label>
+        <input id="origin" name="origin" placeholder="Miami (city or airport)" autocomplete="off" />
+      </div>
+      <div class="field">
+        <label for="dest">To</label>
+        <input id="dest" name="dest" placeholder="Bogota (city or airport)" autocomplete="off" />
+      </div>
       <div class="row">
-        <div><label for="departDate">Depart</label><input id="departDate" name="departDate" type="date" /></div>
-        <div><label for="returnDate">Return (optional)</label><input id="returnDate" name="returnDate" type="date" /></div>
+        <div class="field"><label for="departDate">Depart</label><input id="departDate" name="departDate" type="date" /></div>
+        <div class="field"><label for="returnDate">Return <span class="opt">· optional</span></label><input id="returnDate" name="returnDate" type="date" /></div>
       </div>
       <div class="error" id="error" role="alert"></div>
       <button class="btn" type="submit">Search flights</button>
     </form>
   </main>
+
   <script src="/app.js"></script>
   <script>
     const form = document.getElementById('search-form');
     const errEl = document.getElementById('error');
+    const submitBtn = form.querySelector('button[type=submit]');
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       errEl.textContent = '';
@@ -50,10 +79,14 @@
         errEl.textContent = 'Please fill in From, To, and a Depart date.';
         return;
       }
+      submitBtn.setAttribute('aria-busy', 'true');
+      submitBtn.textContent = 'Starting search…';
       try {
         const { id } = await window.postJSON('/search', body);
         window.location.href = `/loading.html?id=${encodeURIComponent(id)}`;
       } catch (err) {
+        submitBtn.removeAttribute('aria-busy');
+        submitBtn.textContent = 'Search flights';
         errEl.textContent = 'Could not start the search. Is the server running?';
       }
     });

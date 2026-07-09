@@ -1,25 +1,120 @@
+/* ============================================================
+   Now is Now — shared design system
+   Vanilla CSS, no build, no external assets. Pink brand.
+   ============================================================ */
 :root {
-  --pink: #ff4fa3;
-  --pink-soft: #ffd9ec;
-  --ink: #1a1a1a;
-  --paper: #fffafd;
-  --font: -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
-  /* CJK-capable stack so 今度は今度、今は今 renders cleanly */
-  --font-cjk: "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", var(--font);
-}
-* { box-sizing: border-box; }
-body { margin: 0; font-family: var(--font); color: var(--ink); background: var(--paper); }
-.btn {
-  display: inline-block; padding: 0.9rem 2rem; border: none; border-radius: 999px;
-  background: var(--pink); color: white; font-size: 1.1rem; cursor: pointer;
-  text-decoration: none; transition: transform .12s ease, box-shadow .12s ease;
-}
-.btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255,79,163,.35); }
+  /* ---- Palette (pink brand; identity-preserving) ---- */
+  --paper:      #fff6fb;   /* app background — faint pink tint */
+  --surface:    #ffffff;   /* cards, inputs */
+  --ink:        #1c1420;   /* near-black, warm */
+  --ink-muted:  #6a6270;   /* secondary text — >=4.5:1 on paper */
+  --pink:       #ff3d9a;   /* brand primary */
+  --pink-deep:  #c8156b;   /* pink text on light — >=4.5:1 */
+  --pink-soft:  #ffd6ec;   /* tints, chips */
+  --pink-tint:  #fff0f7;   /* very light section bg */
+  --line:       #f4d7e7;   /* hairline borders */
 
-/* Trilingual marquee — three phrases scrolling horizontally, one after another */
-.marquee { overflow: hidden; white-space: nowrap; width: 100%; }
-.marquee__track { display: inline-block; padding-left: 100%; animation: marquee 22s linear infinite; }
-.marquee__phrase { display: inline-block; margin: 0 2.5rem; font-size: 1.4rem; color: var(--pink); }
+  /* ---- Fonts (system only — offline safe) ---- */
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  --font-cjk: "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", var(--font);
+
+  /* ---- Spacing scale ---- */
+  --sp-1: .25rem; --sp-2: .5rem;  --sp-3: .75rem; --sp-4: 1rem;
+  --sp-5: 1.5rem; --sp-6: 2rem;   --sp-7: 3rem;   --sp-8: 4rem; --sp-9: 6rem;
+
+  /* ---- Radii ---- */
+  --r-sm: 10px; --r-md: 14px; --r-lg: 22px; --r-pill: 999px;
+
+  /* ---- Shadows ---- */
+  --shadow-sm: 0 1px 2px rgba(28,20,32,.06), 0 1px 1px rgba(28,20,32,.04);
+  --shadow-md: 0 12px 34px rgba(200,21,107,.10), 0 2px 8px rgba(28,20,32,.05);
+  --glow:      0 8px 26px rgba(255,61,154,.34);
+
+  /* ---- Motion ---- */
+  --ease: cubic-bezier(.16, 1, .3, 1);  /* ease-out-expo-ish */
+  --dur: .18s;
+
+  /* ---- z-index scale ---- */
+  --z-header: 100; --z-overlay: 200;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  color: var(--ink);
+  background: var(--paper);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+h1, h2, h3 { text-wrap: balance; letter-spacing: -.02em; line-height: 1.08; margin: 0; }
+p { text-wrap: pretty; }
+a { color: var(--pink-deep); }
+
+:where(a, button, input, [tabindex]):focus-visible {
+  outline: 3px solid var(--pink);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+/* ---- Buttons ---- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  padding: .9rem 1.8rem; border: none; border-radius: var(--r-pill);
+  background: var(--pink); color: #fff;
+  font: inherit; font-size: 1.05rem; font-weight: 650; line-height: 1;
+  cursor: pointer; text-decoration: none; white-space: nowrap;
+  box-shadow: var(--glow);
+  transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.btn:hover { transform: translateY(-2px); background: #ff2b90; box-shadow: 0 14px 36px rgba(255,61,154,.42); }
+.btn:active { transform: translateY(0); box-shadow: var(--shadow-sm); }
+.btn[disabled], .btn[aria-busy="true"] { pointer-events: none; opacity: .72; }
+
+.btn--ghost {
+  background: transparent; color: var(--pink-deep);
+  border: 1.5px solid var(--pink-soft); box-shadow: none;
+  font-size: 1rem; padding: .7rem 1.3rem;
+}
+.btn--ghost:hover { background: var(--pink-tint); border-color: var(--pink); transform: translateY(-1px); box-shadow: none; }
+
+/* ---- Brand / header ---- */
+.brand { display: inline-flex; align-items: center; gap: .55rem; text-decoration: none; color: var(--ink); font-weight: 750; letter-spacing: -.02em; font-size: 1.05rem; }
+.brand__globe {
+  width: 24px; height: 24px; border-radius: 50%; flex: none;
+  background: radial-gradient(circle at 34% 30%, #ff9ccf, var(--pink) 60%, #c8156b);
+  box-shadow: inset -3px -3px 7px rgba(0,0,0,.22);
+}
+.site-header {
+  position: sticky; top: 0; z-index: var(--z-header);
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--sp-4); padding: var(--sp-4) var(--sp-5);
+  background: color-mix(in srgb, var(--paper) 86%, transparent);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+
+/* ---- Trilingual marquee (landing + loading) ---- */
+.marquee {
+  overflow: hidden; white-space: nowrap; width: 100%;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+          mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+}
+.marquee__track { display: inline-block; padding-left: 100%; animation: marquee 30s linear infinite; }
+.marquee:hover .marquee__track { animation-play-state: paused; }
+.marquee__phrase { display: inline-block; font-size: 1.2rem; font-weight: 600; color: var(--pink-deep); }
 .marquee__phrase--cjk { font-family: var(--font-cjk); }
+.marquee__phrase::after { content: "\273A"; margin: 0 2rem; color: var(--pink-soft); font-weight: 400; }
 @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-100%); } }
-@media (prefers-reduced-motion: reduce) { .marquee__track { animation: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .marquee__track { animation: none; padding-left: 0; text-align: center; }
+  .marquee { -webkit-mask-image: none; mask-image: none; }
+}
+
+/* ---- Shared page container ---- */
+.wrap { width: 100%; max-width: 760px; margin: 0 auto; padding: 0 var(--sp-5); }
+
+/* ---- Visually-hidden (a11y) ---- */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
