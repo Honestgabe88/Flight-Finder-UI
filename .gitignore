@@ -1,0 +1,5 @@
+node_modules/
+.captures/results.json
+.captures/gflights_results.json
+*.log
+.DS_Store
