@@ -6,62 +6,151 @@
   <title>Now is Now — cheap flights, booked now</title>
   <link rel="stylesheet" href="/styles.css" />
   <style>
-    .hero { min-height: 100svh; display: grid; grid-template-rows: 1fr auto; }
+    /* Landing is a single screen — lock it to the viewport, no scroll. */
+    html, body { height: 100%; }
+    body { overflow: hidden; }
+
+    .hero {
+      position: relative; height: 100svh; overflow: hidden;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
     .hero__inner {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      text-align: center; gap: var(--sp-6); padding: var(--sp-8) var(--sp-5) var(--sp-6);
+      text-align: center; gap: clamp(1rem, 3vh, 1.9rem); padding: 0 var(--sp-5);
     }
-    /* --- Globe stage --- */
-    .stage { position: relative; width: 240px; height: 240px; display: grid; place-items: center; }
+
+    /* ===== Split-scene globe ===== */
+    .stage { position: relative; width: min(440px, 54vh); aspect-ratio: 1; display: grid; place-items: center; }
     .stage::before {
-      content: ""; position: absolute; inset: -22%;
-      background: radial-gradient(circle, rgba(255,61,154,.30), transparent 62%);
-      filter: blur(4px);
+      content: ""; position: absolute; inset: -14%;
+      background: radial-gradient(circle, rgba(255,61,154,.34), rgba(74,214,255,.16) 54%, transparent 72%);
+      filter: blur(6px);
     }
     .globe {
-      position: relative; width: 176px; height: 176px; border-radius: 50%; overflow: hidden;
-      background: radial-gradient(circle at 33% 27%, #ffb0da, var(--pink) 56%, #b81259 100%);
-      box-shadow:
-        inset -16px -18px 36px rgba(90,0,40,.42),
-        inset 9px 11px 22px rgba(255,255,255,.38),
-        0 20px 44px rgba(255,61,154,.36);
-      animation: spin 18s linear infinite;
+      position: relative; width: 100%; height: 100%; border-radius: 50%; overflow: hidden;
+      box-shadow: 0 0 52px rgba(255,61,154,.45), 0 0 84px rgba(74,214,255,.24), 0 26px 56px rgba(70,0,55,.4);
+      animation: bob 7s ease-in-out infinite;
     }
-    .globe::before, .globe::after { content: ""; position: absolute; inset: 0; border-radius: 50%; opacity: .55; }
-    .globe::before { background: repeating-linear-gradient(90deg, transparent 0 20px, rgba(255,255,255,.30) 20px 21px); }
-    .globe::after  {
-      background: repeating-linear-gradient(0deg, transparent 0 22px, rgba(255,255,255,.22) 22px 23px);
-      -webkit-mask: radial-gradient(circle, #000 58%, transparent 74%);
-              mask: radial-gradient(circle, #000 58%, transparent 74%);
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .orbit { position: absolute; inset: 4px; animation: orbit 11s linear infinite; }
-    .orbit__plane {
-      position: absolute; top: -10px; left: 50%; transform: translateX(-50%) rotate(45deg);
-      font-size: 1.6rem; filter: drop-shadow(0 3px 4px rgba(120,0,50,.28));
-    }
+    @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+    .scene { position: absolute; top: 0; height: 100%; width: 50%; overflow: hidden; }
+    .scene--japan { left: 0; background: linear-gradient(180deg, #cfe3fb 0%, #e6f1ff 40%, #f4f9ff 60%); }
+    .scene--miami { right: 0; background: linear-gradient(180deg, #ff8dbe 0%, #ffa07e 34%, #ffd08a 52%, #ffe6b0 60%); }
+
+    /* --- Japan: snowy ski town --- */
+    .jp-mtn-back { position: absolute; left: -10%; right: -10%; bottom: 40%; height: 34%;
+      background: linear-gradient(180deg, #bcd6f0, #a7c6e6);
+      clip-path: polygon(0 60%, 20% 18%, 38% 55%, 56% 8%, 76% 50%, 92% 24%, 100% 52%, 100% 100%, 0 100%); }
+    .jp-mtn-front { position: absolute; left: 20%; right: -24%; bottom: 40%; height: 42%;
+      background: linear-gradient(180deg, #ffffff 0%, #ffffff 34%, #e2edf8 35%, #cfddee 100%);
+      clip-path: polygon(50% 0, 82% 100%, 18% 100%); }
+    .jp-ground { position: absolute; left: 0; right: 0; bottom: 0; height: 40%;
+      background: linear-gradient(180deg, #f3f8ff, #ffffff 70%); }
+    .pine { position: absolute; bottom: 36%; width: 9%; height: 15%; background: #2f6a4c;
+      clip-path: polygon(50% 0, 100% 100%, 0 100%); filter: drop-shadow(0 2px 0 rgba(47,106,76,.4)); }
+    .pine--1 { left: 14%; }
+    .pine--2 { left: 62%; bottom: 34%; height: 12%; }
+    .lodge { position: absolute; bottom: 34%; left: 34%; width: 20%; height: 15%; }
+    .lodge__roof { position: absolute; top: 0; left: -14%; width: 128%; height: 52%;
+      background: #eef5ff; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+    .lodge__body { position: absolute; bottom: 0; left: 8%; width: 84%; height: 56%; background: #7c5038; border-radius: 2px; }
+    .lodge__win { position: absolute; bottom: 12%; left: 40%; width: 22%; height: 24%;
+      background: #ffd36a; border-radius: 1px; box-shadow: 0 0 7px rgba(255,196,84,.9); }
+    .snow span { position: absolute; top: -6%; width: 4px; height: 4px; border-radius: 50%;
+      background: #fff; opacity: .9; animation: fall linear infinite; }
+    .snow span:nth-child(1){ left: 12%; animation-duration: 6s; animation-delay: 0s; }
+    .snow span:nth-child(2){ left: 30%; animation-duration: 8s; animation-delay: 1.5s; }
+    .snow span:nth-child(3){ left: 48%; animation-duration: 7s; animation-delay: .8s; }
+    .snow span:nth-child(4){ left: 66%; animation-duration: 9s; animation-delay: 2.2s; }
+    .snow span:nth-child(5){ left: 82%; animation-duration: 6.5s; animation-delay: 1s; }
+    .snow span:nth-child(6){ left: 22%; animation-duration: 7.5s; animation-delay: 3s; }
+    .snow span:nth-child(7){ left: 74%; animation-duration: 8.5s; animation-delay: .4s; }
+    @keyframes fall { to { transform: translateY(300px); } }
+
+    /* --- Miami: sunset beach --- */
+    .mi-sun { position: absolute; left: 22%; bottom: 40%; width: 56%; aspect-ratio: 1; border-radius: 50%;
+      background: linear-gradient(180deg, #fff2ad 0%, #ffce7a 45%, #ff8fb0 100%);
+      box-shadow: 0 0 34px rgba(255,190,120,.75); overflow: hidden; }
+    .mi-sun::after { content: ""; position: absolute; inset: 0;
+      background: repeating-linear-gradient(180deg, transparent 0 6px, rgba(255,140,150,.55) 6px 9px);
+      -webkit-mask: linear-gradient(180deg, transparent 44%, #000 52%); mask: linear-gradient(180deg, transparent 44%, #000 52%); }
+    .mi-sea { position: absolute; left: 0; right: 0; bottom: 20%; height: 20%;
+      background: linear-gradient(180deg, #74e2e6, #2ba9c6); }
+    .mi-sea::before { content: ""; position: absolute; inset: 0;
+      background: repeating-linear-gradient(180deg, transparent 0 5px, rgba(255,255,255,.25) 5px 6px); opacity: .5; }
+    .mi-sand { position: absolute; left: 0; right: 0; bottom: 0; height: 20%;
+      background: linear-gradient(180deg, #ffe1a0, #f3c87e); }
+    .palm { position: absolute; bottom: 18%; }
+    .palm__trunk { position: absolute; bottom: 0; left: 50%; width: 5px; height: 58px;
+      background: #16242b; transform: translateX(-50%) rotate(-7deg); border-radius: 3px 3px 0 0; }
+    .palm__crown { position: absolute; bottom: 55px; left: 50%; width: 0; height: 0; }
+    .palm__crown span { position: absolute; left: 0; top: 0; width: 34px; height: 10px; background: #16242b;
+      border-radius: 0 100% 0 100% / 0 100% 0 100%; transform-origin: 0 50%; }
+    .palm__crown span:nth-child(1){ transform: rotate(-18deg); }
+    .palm__crown span:nth-child(2){ transform: rotate(22deg); }
+    .palm__crown span:nth-child(3){ transform: rotate(62deg); }
+    .palm__crown span:nth-child(4){ transform: rotate(118deg); }
+    .palm__crown span:nth-child(5){ transform: rotate(158deg); }
+    .palm__crown span:nth-child(6){ transform: rotate(198deg); }
+    .palm--1 { left: 44%; transform: scale(1.05); }
+    .palm--2 { left: 16%; bottom: 16%; transform: scale(.72); opacity: .92; }
+
+    /* --- Seam + sphere sheen (sell the 3D globe) --- */
+    .seam { position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; transform: translateX(-50%);
+      background: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.12));
+      box-shadow: 0 0 8px rgba(255,255,255,.4); }
+    .globe__sheen { position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+      background: radial-gradient(40% 32% at 30% 22%, rgba(255,255,255,.4), transparent 60%);
+      box-shadow: inset -20px -24px 48px rgba(20,0,40,.42), inset 16px 18px 32px rgba(255,255,255,.22); }
+
+    .orbit { position: absolute; inset: 0; animation: orbit 12s linear infinite; z-index: 3; }
+    .orbit__plane { position: absolute; top: -12px; left: 50%; transform: translateX(-50%) rotate(45deg);
+      font-size: clamp(1.3rem, 3.6vh, 1.8rem); filter: drop-shadow(0 3px 5px rgba(120,0,50,.34)); }
     @keyframes orbit { to { transform: rotate(360deg); } }
-    @media (prefers-reduced-motion: reduce) { .globe, .orbit { animation: none; } }
+    @media (prefers-reduced-motion: reduce) { .globe, .orbit, .snow span { animation: none; } }
 
     /* --- Copy --- */
-    .headline { font-size: clamp(2.5rem, 8vw, 4.4rem); font-weight: 800; }
-    .headline em { font-style: normal; color: var(--pink-deep); }
-    .sub { max-width: 32ch; color: var(--ink-muted); font-size: 1.1rem; }
+    .sub { max-width: 34ch; color: var(--ink-muted); font-size: clamp(1rem, 2.3vh, 1.15rem); }
     .cta-row { display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); }
-    .cta-note { font-size: .9rem; color: var(--ink-muted); }
+    .cta-note { font-size: .9rem; color: var(--ink-muted); font-family: var(--font-cjk); }
 
-    /* --- Marquee band --- */
-    .marquee-band { padding: var(--sp-5) 0 var(--sp-7); border-top: 1px solid var(--line); }
+    .marquee-band {
+      position: absolute; left: 0; right: 0; bottom: 0;
+      padding: clamp(.5rem, 1.8vh, 1.1rem) 0 clamp(.9rem, 2.6vh, 1.7rem);
+      border-top: 1px solid var(--line);
+    }
   </style>
 </head>
 <body>
   <main class="hero">
     <div class="hero__inner">
       <div class="stage">
-        <div class="globe" role="img" aria-label="A spinning pink globe"></div>
+        <div class="globe" role="img" aria-label="A globe split between a snowy Japanese ski town and a Miami Beach sunset">
+          <div class="scene scene--japan">
+            <div class="jp-mtn-back"></div>
+            <div class="jp-mtn-front"></div>
+            <div class="jp-ground"></div>
+            <div class="pine pine--1"></div>
+            <div class="pine pine--2"></div>
+            <div class="lodge">
+              <div class="lodge__roof"></div>
+              <div class="lodge__body"></div>
+              <div class="lodge__win"></div>
+            </div>
+            <div class="snow" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+          </div>
+          <div class="scene scene--miami">
+            <div class="mi-sun"></div>
+            <div class="mi-sea"></div>
+            <div class="mi-sand"></div>
+            <div class="palm palm--2"><div class="palm__crown"><span></span><span></span><span></span><span></span><span></span><span></span></div><div class="palm__trunk"></div></div>
+            <div class="palm palm--1"><div class="palm__crown"><span></span><span></span><span></span><span></span><span></span><span></span></div><div class="palm__trunk"></div></div>
+          </div>
+          <div class="seam" aria-hidden="true"></div>
+          <div class="globe__sheen" aria-hidden="true"></div>
+        </div>
         <div class="orbit" aria-hidden="true"><span class="orbit__plane">✈️</span></div>
       </div>
-      <h1 class="headline">Stop saying <em>next&nbsp;time.</em></h1>
       <p class="sub">Real fares from Kiwi, lastminute &amp; Google — each with a booking link, found right now.</p>
       <div class="cta-row">
         <a class="btn" href="/search.html">Find me a flight&nbsp;&rarr;</a>
