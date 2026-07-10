@@ -12,6 +12,9 @@ module.exports = {
   CAPTURES_DIR: path.join(__dirname, '.captures'),
   RESULTS_FILE: path.join(__dirname, '.captures', 'results.json'),
   GFLIGHTS_FILE: path.join(__dirname, '.captures', 'gflights_results.json'),
+  // Per-search outcome sidecar (ok/challenge/error/empty) so an empty Google
+  // result is never mistaken for "Google had nothing".
+  GFLIGHTS_STATUS_FILE: path.join(__dirname, '.captures', 'gflights_status.json'),
   // Read-only backend location (we only ever READ from here).
   BACKEND_DIR: '/workspaces/other_project',
 };

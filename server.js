@@ -33,6 +33,9 @@ function readBody(req) {
 function runGoogle(query) {
   return new Promise((resolve) => {
     const env = { ...process.env, ORIGINS: query.origin, DEST: query.dest, DATES: query.departDate, MAXH: String(MAXH), CONC: '2' };
+    // Round-trip: hand Google the return date so it prices its own bundled round-trip
+    // option (comparable to Kiwi/lastminute round-trip totals). Absent -> one-way.
+    if (query.returnDate) env.RETURN = query.returnDate;
     const child = spawn('node', [path.join(__dirname, 'lib', 'search.js')], { env, cwd: __dirname });
     child.on('close', () => {
       try { resolve(JSON.parse(fs.readFileSync(GFLIGHTS_FILE, 'utf8'))); }

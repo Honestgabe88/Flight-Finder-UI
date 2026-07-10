@@ -34,3 +34,32 @@ test('mergeOptions filters over-ceiling, ranks by price, caps at 5', () => {
   const sources = new Set(out.map(o => o.source));
   assert.ok(sources.size >= 2);                             // source diversity
 });
+
+test('round-trip: normalize carries tripType + a "through" booking URL', () => {
+  const rt = { origin: 'Miami', dest: 'Bogota', departDate: '2026-08-13', returnDate: '2026-08-20' };
+  const row = { source: 'google_flights', origin: 'Miami', dest: 'Bogota', date: '2026-08-13',
+    returnDate: '2026-08-20', price_eur: 300, stops: 0, airline: 'Avianca', durationMin: 300,
+    depTime: '9:00 AM', arrTime: '2:00 PM', tripType: 'roundtrip', legDetails: 'outbound-only' };
+  const o = normalizeGoogleRow(row, rt);
+  assert.equal(o.tripType, 'roundtrip');
+  assert.equal(o.legDetails, 'outbound-only');
+  assert.equal(o.returnDate, '2026-08-20');
+  assert.match(o.bookingUrl, /through/);                    // round-trip booking link
+});
+
+test('mergeOptions drops Google rows whose trip type != the requested trip type', () => {
+  const rt = { origin: 'Miami', dest: 'Bogota', departDate: '2026-08-13', returnDate: '2026-08-20' };
+  const googleRows = [
+    // A stray ONE-WAY label at half the price must NOT undercut the round-trip total.
+    { source: 'google_flights', price_eur: 120, stops: 1, airline: 'Cheap OW', durationMin: 400,
+      depTime: '10:00', arrTime: '4:00 PM', origin: 'Miami', dest: 'Bogota', date: '2026-08-13',
+      returnDate: null, tripType: 'oneway', legDetails: 'full' },
+    { source: 'google_flights', price_eur: 300, stops: 0, airline: 'RT Fair', durationMin: 300,
+      depTime: '08:00', arrTime: '1:00 PM', origin: 'Miami', dest: 'Bogota', date: '2026-08-13',
+      returnDate: '2026-08-20', tripType: 'roundtrip', legDetails: 'outbound-only' },
+  ];
+  const out = mergeOptions({ googleRows, agentOptions: [], query: rt });
+  assert.ok(out.every((o) => o.tripType === 'roundtrip'));   // one-way stray removed
+  assert.ok(out.some((o) => o.airline === 'RT Fair'));
+  assert.ok(!out.some((o) => o.airline === 'Cheap OW'));
+});
